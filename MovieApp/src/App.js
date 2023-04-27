@@ -9,7 +9,7 @@ import Login from "./Component/Login";
 import Signup from "./Component/Signup";
 const Authcontext = createContext();
 function App() {
-  const [login, setlogin] = useState(true);
+  const [login, setlogin] = useState(false);
   const [userName, setuserName] = useState("");
   return (
     <Authcontext.Provider value={{ login, userName, setlogin, setuserName }}>
