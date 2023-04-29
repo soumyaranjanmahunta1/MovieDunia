@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ReactStars from "react-stars";
+import { Authcontext } from "../App";
 import { reviewref } from "../Firebase/Firebase";
 import {
   addDoc,
@@ -9,38 +10,51 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 import { db } from "../Firebase/Firebase";
 import { TailSpin, ThreeDots } from "react-loader-spinner";
 import swal from "sweetalert";
 export default function Review({ id, prevrating, userrated }) {
+  const navigate = useNavigate();
+  const Appstate = useContext(Authcontext);
   const [rate, setrate] = useState(0);
   const [loading, setloading] = useState(false);
   const [reviewloading, setreviewloading] = useState(false);
   const [form, setform] = useState("");
   const [data, setdata] = useState([]);
+  const [added, setadded] = useState(0);
+  
   const sendreview = async () => {
     setloading(true);
+    setdata([]);
     try {
-      await addDoc(reviewref, {
-        movieid: id,
-        name: "soumya",
-        rating: rate,
-        thought: form,
-        timestamp: new Date().getTime(),
-      });
-      const ref = doc(db, "movies", id);
-      await updateDoc(ref, {
-        rating: prevrating + rate,
-        rated: userrated + 1,
-      });
-      setrate(0);
-      setform("");
-      swal({
-        title: "Successfully Review send",
-        icon: "success",
-        button: false,
-        timer: 3000,
-      });
+       if (Appstate.login) {
+         await addDoc(reviewref, {
+           movieid: id,
+           name: Appstate.userName,
+           rating: rate,
+           thought: form,
+           timestamp: new Date().getTime(),
+         });
+         const ref = doc(db, "movies", id);
+         await updateDoc(ref, {
+           rating: prevrating + rate,
+           rated: userrated + 1,
+         });
+         setrate(0);
+         setform("");
+         swal({
+           title: "Successfully Review send",
+           icon: "success",
+           button: false,
+           timer: 3000,
+         });
+         navigate("/login");
+        
+      }
+       else {
+         navigate("/login")
+      }
     } catch (err) {
       swal({
         title: "Review Not added",
@@ -50,7 +64,7 @@ export default function Review({ id, prevrating, userrated }) {
       });
     }
     setloading(false);
-    window.location.reload(true);
+    
   };
   useEffect(() => {
     async function getdata() {
@@ -63,7 +77,7 @@ export default function Review({ id, prevrating, userrated }) {
       setreviewloading(false);
     }
     getdata();
-  }, []);
+  }, [added]);
   return (
     <div className="mt-4  w-full border-t-2 border-gray-300">
       <ReactStars

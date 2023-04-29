@@ -4,8 +4,11 @@ import swal from "sweetalert";
 import { addDoc } from "firebase/firestore";
 import { moviesref } from "../Firebase/Firebase";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { Authcontext } from "../App";
 export default function AddMovie() {
-  const navigate = useNavigate();
+  const useAppstate = useContext(Authcontext);
+    const navigate = useNavigate();
   const [form, setform] = useState({
     title: "",
     year: "",
@@ -18,13 +21,30 @@ export default function AddMovie() {
   const AddMovie = async () => {
     setloading(true);
     try {
-      await addDoc(moviesref, form);
-      swal({
-        title: "Successfully Movie Added",
-        icon: "success",
-        button: false,
-        timer: 3000,
-      });
+      if (useAppstate.login) {
+        await addDoc(moviesref, form);
+        swal({
+          title: "Successfully Movie Added",
+          icon: "success",
+          button: false,
+          timer: 3000,
+        });
+        setform({
+          title: "",
+          year: "",
+          image: "",
+          des: "",
+        });
+         navigate("/");
+      } else {
+        swal({
+          title: "Login before Adding any movies",
+          icon: "error",
+          button: false,
+          timer: 3000,
+        });
+        navigate("/login");
+      }
     } catch (err) {
       swal({
         title: "Movie Not Added",
@@ -35,7 +55,7 @@ export default function AddMovie() {
     }
 
     setloading(false);
-    navigate("/");
+   
   };
   return (
     <div>

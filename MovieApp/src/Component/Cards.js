@@ -35,7 +35,7 @@ export default function Cards() {
               >
                 <img className="h-60 md:h-72" src={el.image} />
                 <h1>
-                  <span className="text-red-500">Titel: </span>
+                 
                   {el.title}
                 </h1>
                 <h1 className="flex items-center">

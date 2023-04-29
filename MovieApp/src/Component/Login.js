@@ -1,12 +1,58 @@
-import React, { useState } from 'react'
+import React, { useState,useContext } from 'react'
 import { TailSpin } from 'react-loader-spinner';
-import { Link } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
+import bcrypt from "bcryptjs";
+import { Authcontext } from "../App";
+import swal from "sweetalert";
+import { usersRef } from "../Firebase/Firebase";
+import { query, where, getDocs } from "firebase/firestore";
 export default function Login() {
+    const navigate = useNavigate();
+    const useAppstate = useContext(Authcontext);
     const [form, setform] = useState({
       mobile: "",
       password: "",
     });
     const[loading,setloading]=useState(false)
+
+    const login = async () => {
+      setloading(true);
+      try {
+        const quer = query(usersRef, where("mobile", "==", form.mobile));
+        const querySnapshot = await getDocs(quer);
+
+        querySnapshot.forEach((doc) => {
+          const _data = doc.data();
+          const isUser = bcrypt.compareSync(form.password, _data.password);
+          if (isUser) {
+            useAppstate.setlogin(true);
+            useAppstate.setuserName(_data.name);
+            swal({
+              title: "Logged In",
+              icon: "success",
+              buttons: false,
+              timer: 3000,
+            });
+            navigate("/");
+          } else {
+            swal({
+              title: "Invalid Credentials",
+              icon: "error",
+              buttons: false,
+              timer: 3000,
+            });
+          }
+        });
+      } catch (error) {
+        swal({
+          title: error.message,
+          icon: "error",
+          buttons: false,
+          timer: 3000,
+        });
+      }
+      setloading(false);
+    };
     return (
       <div className="flex flex-col  mt-4  items-center ">
         <h1 className="text-xl font-bold text-blue-600 ">Login</h1>
@@ -53,7 +99,7 @@ export default function Login() {
             </div>
           </div>
           <div class="p-2 w-full">
-            <button class="flex mx-auto text-white bg-green-500 border-0 py-2 px-8 focus:outline-none hover:bg-black rounded text-lg">
+            <button onClick={login} class="flex mx-auto text-white bg-green-500 border-0 py-2 px-8 focus:outline-none hover:bg-black rounded text-lg">
               {loading ? <TailSpin height={25} color="white" /> : "Login"}
             </button>
           </div>
