@@ -49,7 +49,7 @@ export default function Review({ id, prevrating, userrated }) {
            button: false,
            timer: 3000,
          });
-         navigate("/login");
+         setadded(1);
         
       }
        else {
