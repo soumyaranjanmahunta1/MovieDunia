@@ -3,7 +3,8 @@ import { TailSpin } from "react-loader-spinner";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { usersRef } from "../Firebase/Firebase";
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs";
+import { addDoc } from "firebase/firestore";
 import {getAuth,RecaptchaVerifier,signInWithPhoneNumber } from "firebase/auth"
 import { Container } from "@mui/system";
 import swal from "sweetalert";
@@ -51,37 +52,37 @@ export default function Signup() {
         console.log(error);
       });
   };
-  //  const verifyOTP = () => {
-  //    try {
-  //      setloading(true);
-  //      window.confirmationResult.confirm(otp).then((result) => {
-  //       //  uploadData();
-  //        swal({
-  //          text: "Sucessfully Registered",
-  //          icon: "success",
-  //          buttons: false,
-  //          timer: 3000,
-  //        });
-  //        navigate("/login");
-  //        setloading(false);
-  //      });
-  //    } catch (error) {
-  //      console.log(error);
-  //    }
-  // };
-    // const uploadData = async () => {
-    //   try {
-    //     const salt = bcrypt.genSaltSync(10);
-    //     var hash = bcrypt.hashSync(form.password, salt);
-    //     await addDoc(usersRef, {
-    //       name: form.name,
-    //       password: hash,
-    //       mobile: form.mobile,
-    //     });
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // };
+   const verifyOTP = () => {
+     try {
+       setloading(true);
+       window.confirmationResult.confirm(otp).then((result) => {
+         uploadData();
+         swal({
+           text: "Sucessfully Registered",
+           icon: "success",
+           buttons: false,
+           timer: 3000,
+         });
+         navigate("/login");
+         setloading(false);
+       });
+     } catch (error) {
+       console.log(error);
+     }
+  };
+    const uploadData = async () => {
+      try {
+        const salt = bcrypt.genSaltSync(10);
+        var hash = bcrypt.hashSync(form.password, salt);
+        await addDoc(usersRef, {
+          name: form.name,
+          password: hash,
+          mobile: form.mobile,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    };
   return (
     <div className="flex flex-col  mt-4  items-center ">
       {otpsend ? (
@@ -119,6 +120,14 @@ export default function Signup() {
                   "Confirm OTP"
                 )}
               </button>
+            </div>
+            <div className="mt-10">
+              <p>
+                Already have an account ?{" "}
+                <Link to="/login">
+                  <span className="text-blue-500 font-bold"> Login</span>
+                </Link>{" "}
+              </p>
             </div>
           </div>
         </>
@@ -178,7 +187,7 @@ export default function Signup() {
                   type="password"
                   id="password"
                   name="password"
-                  // value={}
+                  value={form.password}
                   onChange={(e) => {
                     setform({ ...form, password: e.target.value });
                   }}
@@ -191,7 +200,11 @@ export default function Signup() {
                 onClick={requestOtp}
                 class="flex mx-auto text-white bg-green-500 border-0 py-2 px-8 focus:outline-none hover:bg-black rounded text-lg"
               >
-                {loading ? <TailSpin height={25} color="white" /> : "Sign up"}
+                {loading ? (
+                  <TailSpin height={25} color="white" />
+                ) : (
+                  "Request OTP"
+                )}
               </button>
             </div>
             <div className="mt-8">
